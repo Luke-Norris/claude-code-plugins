@@ -1,0 +1,13 @@
+{
+  "name": "project-dashboard",
+  "description": "Auto-maintained HTML dashboards for project changelog, backlog, documentation, and test results. Agents update dashboards after commits and on demand.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Luke Norris"
+  },
+  "source": {
+    "source": "url",
+    "url": "https://github.com/Luke-Norris/claude-code-plugins.git",
+    "path": "project-dashboard"
+  }
+}
