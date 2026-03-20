@@ -26,7 +26,7 @@ Present the detected values and ask the user to confirm or override:
 - Project description (ask for this — can't auto-detect)
 - Repo URL
 - Dashboard directory (default: `docs/dashboard`)
-- Which dashboards to create (default: all 4: changelog, backlog, documentation, test-results)
+- Which dashboards to create (default: all 3: changelog, backlog, documentation)
 
 ### 3. Create dashboards
 
@@ -50,7 +50,7 @@ Write `.dashboard.json` to the project root:
   "project_name": "{PROJECT_NAME}",
   "repo_url": "{REPO_URL}",
   "dashboard_dir": "{DASHBOARD_DIR}",
-  "dashboards": ["changelog", "backlog", "documentation", "test-results"]
+  "dashboards": ["changelog", "backlog", "documentation"]
 }
 ```
 
@@ -65,10 +65,9 @@ Created:
   {dashboard_dir}/changelog.html
   {dashboard_dir}/backlog.html
   {dashboard_dir}/documentation.html
-  {dashboard_dir}/test-results.html
   .dashboard.json
 
 The post-commit hook will automatically trigger changelog and backlog updates after each git commit.
 
-To manually update dashboards, ask me to run the update-documentation or update-test-results agents.
+To manually update documentation, ask me to run the update-documentation agent.
 ```
