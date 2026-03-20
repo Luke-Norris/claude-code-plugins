@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{PROJECT_NAME}} — Project Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   BASE & RESET
+   ================================================================ */
+:root {
+    --bg: #0d1117;
+    --bg-surface: #161b22;
+    --bg-elevated: #1c2128;
+    --bg-card: #21262d;
+    --border: #30363d;
+    --border-light: #21262d;
+    --text: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #484f58;
+    --blue: #58a6ff;
+    --blue-dim: rgba(88,166,255,0.15);
+    --green: #3fb950;
+    --green-dim: rgba(63,185,80,0.15);
+    --red: #f85149;
+    --red-dim: rgba(248,81,73,0.15);
+    --yellow: #d29922;
+    --yellow-dim: rgba(210,153,34,0.15);
+    --purple: #bc8cff;
+    --purple-dim: rgba(188,140,255,0.15);
+    --orange: #f0883e;
+    --orange-dim: rgba(240,136,62,0.15);
+    --cyan: #39d2c0;
+    --cyan-dim: rgba(57,210,192,0.15);
+    --code-bg: #0d1117;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+    scroll-behavior: smooth;
+    font-size: 15px;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ================================================================
+   PRINT STYLES
+   ================================================================ */
+@media print {
+    body { background: white; color: #1a1a2e; font-size: 11pt; }
+    .title-page { page-break-after: always; }
+    .toc-sidebar { display: none; }
+    section { page-break-inside: avoid; }
+    h2 { page-break-before: always; page-break-after: avoid; }
+    h3, h4 { page-break-after: avoid; }
+    pre, .diagram-container, table { page-break-inside: avoid; }
+    .toc-nav { display: none; }
+    :root {
+        --bg: #ffffff;
+        --bg-surface: #f6f8fa;
+        --bg-elevated: #f0f2f5;
+        --bg-card: #eaecef;
+        --border: #d0d7de;
+        --text: #1a1a2e;
+        --text-secondary: #57606a;
+        --code-bg: #f6f8fa;
+    }
+}
+
+/* ================================================================
+   TITLE PAGE
+   ================================================================ */
+.title-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.title-page::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(88,166,255,0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.title-logo {
+    width: 180px;
+    height: 180px;
+    margin-bottom: 40px;
+    filter: drop-shadow(0 0 40px rgba(88,166,255,0.2));
+}
+
+.title-name {
+    font-size: 4.5rem;
+    font-weight: 800;
+    letter-spacing: 12px;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+.title-subtitle {
+    font-size: 1.1rem;
+    font-weight: 400;
+    letter-spacing: 6px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 50px;
+}
+
+.title-doc-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--blue);
+    margin-bottom: 10px;
+}
+
+.title-meta {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 2;
+}
+
+.title-meta span { color: var(--text-secondary); }
+
+.title-divider {
+    width: 80px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    margin: 30px auto;
+}
+
+/* ================================================================
+   NAV BAR
+   ================================================================ */
+.nav-bar {
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border);
+    padding: 6px 40px;
+    display: flex;
+    gap: 4px;
+    position: sticky;
+    top: 0;
+    z-index: 99;
+}
+.nav-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+.nav-link:hover { color: var(--text); background: rgba(88,166,255,0.1); }
+.nav-link.active { color: var(--blue); background: rgba(88,166,255,0.15); }
+
+/* ================================================================
+   SIDEBAR TOC LAYOUT
+   ================================================================ */
+.doc-layout {
+    display: flex;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 0;
+}
+
+.toc-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 60px;
+    height: calc(100vh - 80px);
+    overflow-y: auto;
+    padding: 20px 16px 20px 24px;
+    border-right: 1px solid var(--border);
+    background: var(--bg);
+}
+.toc-sidebar h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin: 0 0 16px 0;
+}
+.toc-sidebar .toc-item {
+    display: block;
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin: 1px 0;
+    border-left: 2px solid transparent;
+    transition: background 0.15s, color 0.15s;
+}
+.toc-sidebar .toc-item:hover {
+    background: var(--bg-surface);
+    color: var(--text);
+}
+.toc-sidebar .toc-item.toc-active {
+    background: rgba(88,166,255,0.08);
+    color: var(--blue);
+    border-left-color: var(--blue);
+}
+.toc-sidebar .toc-item .toc-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-right: 8px;
+}
+.toc-sidebar .toc-item.toc-sub {
+    padding-left: 28px;
+    font-size: 12px;
+}
+.toc-sidebar .toc-item.toc-sub .toc-num {
+    font-size: 10px;
+}
+
+.doc-content {
+    flex: 1;
+    min-width: 0;
+    padding: 40px;
+    max-width: 900px;
+}
+
+@media (max-width: 900px) {
+    .toc-sidebar { display: none; }
+    .doc-layout { display: block; }
+    .doc-content { padding: 20px; }
+}
+
+@media print {
+    .toc-sidebar { display: none; }
+    .doc-layout { display: block; }
+}
+
+/* ================================================================
+   SECTION HEADINGS
+   ================================================================ */
+section {
+    padding: 60px 0 40px;
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--blue);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+h2 .section-num {
+    font-family: var(--mono);
+    font-size: 1rem;
+    color: var(--blue);
+    background: var(--blue-dim);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+h3 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 35px 0 15px;
+}
+
+h3 .sub-num {
+    color: var(--blue);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    margin-right: 8px;
+}
+
+h4 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 25px 0 10px;
+}
+
+p {
+    margin-bottom: 16px;
+    color: var(--text);
+}
+
+/* ================================================================
+   CODE BLOCKS
+   ================================================================ */
+pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin: 16px 0;
+}
+
+code {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    background: var(--bg-surface);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--cyan);
+}
+
+pre code {
+    background: none;
+    padding: 0;
+    color: var(--text);
+}
+
+/* ================================================================
+   TABLES
+   ================================================================ */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.9rem;
+}
+
+th {
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+}
+
+td {
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+}
+
+/* ================================================================
+   LISTS
+   ================================================================ */
+ul, ol {
+    margin: 12px 0 16px 24px;
+    color: var(--text);
+}
+
+li {
+    margin-bottom: 6px;
+}
+
+/* ================================================================
+   DIAGRAM CONTAINERS
+   ================================================================ */
+.diagram-container {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0;
+    overflow-x: auto;
+}
+
+.diagram-container pre {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    white-space: pre;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+/* ================================================================
+   INFO BOXES
+   ================================================================ */
+.info-box {
+    background: var(--blue-dim);
+    border: 1px solid rgba(88,166,255,0.3);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 0.9rem;
+}
+
+.info-box.warning {
+    background: var(--yellow-dim);
+    border-color: rgba(210,153,34,0.3);
+}
+
+.info-box.danger {
+    background: var(--red-dim);
+    border-color: rgba(248,81,73,0.3);
+}
+
+.info-box strong {
+    display: block;
+    margin-bottom: 4px;
+}
+</style>
+</head>
+<body>
+<nav class="nav-bar">
+  <a href="changelog.html" class="nav-link">Changelog</a>
+  <a href="documentation.html" class="nav-link active">Documentation</a>
+  <a href="test-results.html" class="nav-link">Test Results</a>
+  <a href="backlog.html" class="nav-link">Backlog</a>
+</nav>
+<!-- ================================================================
+     TITLE PAGE
+     ================================================================ -->
+<div class="title-page">
+    <div class="title-name">{{PROJECT_NAME}}</div>
+    <div class="title-subtitle">{{PROJECT_DESCRIPTION}}</div>
+    <div class="title-divider"></div>
+    <div class="title-doc-name">Comprehensive Project Documentation</div>
+    <div class="title-meta">
+        <span>Version 0.1-dev</span>
+    </div>
+</div>
+
+<div class="doc-layout">
+    <!-- Sidebar TOC -->
+    <nav class="toc-sidebar">
+        <h3>Contents</h3>
+        <!-- Example TOC entry. The update-documentation agent manages this list. -->
+        <a class="toc-item" href="#overview"><span class="toc-num">01</span><span class="toc-title">Overview</span></a>
+        <!-- Add new TOC entries here. Use toc-sub class for subsections:
+        <a class="toc-item toc-sub" href="#subsection-id"><span class="toc-num">1.1</span><span class="toc-title">Subsection</span></a>
+        -->
+    </nav>
+
+    <div class="doc-content">
+
+        <!-- ============================================================
+             DOCUMENTATION SECTIONS
+             The update-documentation agent adds and updates sections here.
+             Each section follows this format:
+
+             <section id="section-id">
+                 <h2><span class="section-num">01</span> Section Title</h2>
+                 <p>Section content...</p>
+
+                 <h3><span class="sub-num">1.1</span> Subsection Title</h3>
+                 <p>Subsection content...</p>
+             </section>
+             ============================================================ -->
+
+        <!-- Example section (replace with real documentation) -->
+        <section id="overview">
+            <h2><span class="section-num">01</span> Overview</h2>
+            <p>
+                This is the comprehensive documentation for <strong>{{PROJECT_NAME}}</strong>.
+                Documentation sections are added and maintained by the update-documentation agent.
+            </p>
+
+            <h3><span class="sub-num">1.1</span> Getting Started</h3>
+            <p>Add getting-started content here.</p>
+
+            <pre><code># Example code block
+echo "Hello from {{PROJECT_NAME}}"</code></pre>
+        </section>
+        <!-- Add new documentation sections above this line -->
+
+    </div><!-- /doc-content -->
+</div><!-- /doc-layout -->
+
+<script>
+// Scroll-spy for documentation sidebar
+(function() {
+    var sections = document.querySelectorAll('section[id]');
+    var tocItems = document.querySelectorAll('.toc-sidebar .toc-item');
+    if (!sections.length || !tocItems.length) return;
+
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            entry.target._isVisible = entry.isIntersecting;
+        });
+        var visible = [];
+        sections.forEach(function(s) { if (s._isVisible) visible.push(s); });
+        if (visible.length) {
+            tocItems.forEach(function(el) { el.classList.remove('toc-active'); });
+            var link = document.querySelector('.toc-sidebar .toc-item[href="#' + visible[0].id + '"]');
+            if (link) link.classList.add('toc-active');
+        }
+    }, { rootMargin: '-60px 0px -70% 0px' });
+
+    sections.forEach(function(s) { observer.observe(s); });
+})();
+</script>
+</body>
+</html>

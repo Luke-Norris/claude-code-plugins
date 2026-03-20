@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{PROJECT_NAME}} — Test Results</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+<style>
+  :root {
+    --bg: #0d1117; --bg2: #161b22; --bg3: #1c2333;
+    --border: #30363d; --text: #c9d1d9; --muted: #8b949e; --dim: #6e7681;
+    --blue: #58a6ff; --green: #3fb950; --red: #f85149; --yellow: #d29922; --purple: #bc8cff; --cyan: #39d3d3;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); line-height:1.6; font-size:14px; }
+  .header { background:var(--bg2); border-bottom:1px solid var(--border); padding:16px 40px; display:flex; align-items:center; gap:14px; position:sticky; top:0; z-index:100; }
+  .header img { height:32px; width:auto; }
+  .header h1 { font-size:1.3rem; font-weight:600; }
+  .header .sub { color:var(--dim); font-size:13px; margin-left:auto; }
+  .nav-bar { background:var(--bg3); border-bottom:1px solid var(--border); padding:6px 40px; display:flex; gap:4px; position:sticky; top:57px; z-index:99; }
+  .nav-link { color:var(--muted); text-decoration:none; font-size:13px; font-weight:500; padding:6px 14px; border-radius:6px; transition:all 0.2s; }
+  .nav-link:hover { color:var(--text); background:rgba(88,166,255,0.1); }
+  .nav-link.active { color:var(--blue); background:rgba(88,166,255,0.15); }
+
+  .main { display:flex; min-height:calc(100vh - 100px); }
+  .sidebar { width:260px; border-right:1px solid var(--border); padding:16px; flex-shrink:0; overflow-y:auto; background:var(--bg); position:sticky; top:100px; height:calc(100vh - 100px); }
+  .sidebar-label { font-size:10px; color:var(--dim); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:10px; font-weight:600; }
+  .run-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin:6px 0; cursor:pointer; transition:all 0.2s; }
+  .run-card:hover { border-color:var(--blue); }
+  .run-card.active { background:rgba(88,166,255,0.1); border-color:var(--blue); }
+  .run-card .date { font-size:13px; font-weight:600; }
+  .run-card.active .date { color:var(--blue); }
+  .run-card .model { font-size:11px; color:var(--muted); margin-top:2px; }
+  .run-card .bar-row { display:flex; align-items:center; gap:6px; margin-top:6px; }
+  .run-card .bar-bg { flex:1; height:4px; background:var(--bg3); border-radius:2px; overflow:hidden; }
+  .run-card .bar-fill { height:100%; border-radius:2px; }
+  .run-card .pct { font-size:11px; font-weight:600; min-width:28px; text-align:right; }
+  .mode-tag { display:inline-block; font-size:9px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; padding:1px 6px; border-radius:8px; margin-top:4px; }
+  .tag-orch { background:rgba(188,140,255,0.15); color:var(--purple); }
+  .tag-agent { background:rgba(88,166,255,0.15); color:var(--blue); }
+
+  .detail { flex:1; padding:24px 32px; overflow-x:auto; }
+  .section-label { font-size:10px; text-transform:uppercase; font-weight:600; letter-spacing:0.05em; margin:24px 0 10px 0; display:flex; align-items:center; gap:6px; }
+  .section-label .material-symbols-outlined { font-size:16px; }
+  .sl-blue { color:var(--blue); }
+  .sl-green { color:var(--green); }
+  .sl-yellow { color:var(--yellow); }
+  .sl-red { color:var(--red); }
+  .sl-purple { color:var(--purple); }
+
+  /* Detail header */
+  .detail-header { margin-bottom:20px; }
+  .detail-header .dh-top { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+  .detail-header .dh-date { font-size:1.3rem; font-weight:700; }
+  .detail-header .dh-score { font-size:1.1rem; font-weight:700; padding:4px 12px; border-radius:10px; }
+  .detail-header .dh-meta { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:12px; }
+
+  /* Score explanation */
+  .score-explanation { background:rgba(210,153,34,0.08); border:1px solid rgba(210,153,34,0.3); border-radius:8px; padding:12px 16px; margin:12px 0 20px 0; font-size:12px; color:var(--yellow); }
+  .score-explanation .se-title { font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px; display:flex; align-items:center; gap:6px; }
+  .score-explanation .se-title .material-symbols-outlined { font-size:16px; }
+
+  /* What Changed */
+  .changes-box { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:12px 16px; margin:0 0 20px 0; }
+  .changes-list { list-style:none; margin:0; padding:0; }
+  .changes-list li { font-size:12px; color:var(--text); padding:4px 0; display:flex; align-items:center; gap:8px; }
+  .change-type { font-size:9px; font-weight:700; text-transform:uppercase; padding:1px 6px; border-radius:4px; letter-spacing:0.04em; }
+  .ct-feat { background:rgba(63,185,80,0.15); color:var(--green); }
+  .ct-fix { background:rgba(248,81,73,0.15); color:var(--red); }
+  .ct-refactor { background:rgba(88,166,255,0.15); color:var(--blue); }
+  .ct-test { background:rgba(188,140,255,0.15); color:var(--purple); }
+
+  /* Tables layout */
+  .tables-row { display:flex; gap:8px; align-items:stretch; }
+  .table-panel { flex:1; min-width:0; }
+  .table-wrap { background:var(--bg2); border:1px solid var(--border); border-radius:12px; overflow:hidden; height:100%; display:flex; flex-direction:column; }
+  .table-header { padding:10px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; flex-shrink:0; height:46px; }
+  .th-active { background:rgba(88,166,255,0.06); }
+  .th-delta { background:rgba(188,140,255,0.06); justify-content:center; }
+  .th-compare { background:rgba(139,148,158,0.04); }
+  .mode-badge { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; padding:3px 8px; border-radius:8px; flex-shrink:0; }
+  .mb-orch { background:rgba(188,140,255,0.2); color:var(--purple); }
+  .mb-agent { background:rgba(88,166,255,0.2); color:var(--blue); }
+  .th-label { font-size:12px; font-weight:600; color:var(--text); }
+  .score-badge { margin-left:auto; font-size:13px; font-weight:700; padding:2px 8px; border-radius:10px; flex-shrink:0; }
+  .badge-yellow { background:rgba(210,153,34,0.15); color:var(--yellow); }
+  .badge-green { background:rgba(63,185,80,0.15); color:var(--green); }
+  .badge-red { background:rgba(248,81,73,0.15); color:var(--red); }
+  .table-header select { background:var(--bg3); color:var(--text); border:1px solid var(--border); padding:4px 8px; border-radius:6px; font-size:11px; font-family:'Inter',sans-serif; flex:1; min-width:0; }
+  .delta-label { font-size:11px; font-weight:700; color:var(--purple); text-transform:uppercase; letter-spacing:0.05em; }
+
+  /* Data tables shared row heights */
+  .rt { border-collapse:collapse; width:100%; flex:1; }
+  .rt th { background:var(--bg3); color:var(--dim); font-weight:600; text-align:left; padding:9px 12px; font-size:10px; text-transform:uppercase; letter-spacing:0.04em; height:36px; }
+  .rt td { padding:9px 12px; border-top:1px solid var(--border); height:40px; vertical-align:middle; }
+  .rt tbody tr { transition:background 0.15s; cursor:pointer; }
+  .rt tbody tr:hover { background:rgba(88,166,255,0.04); }
+  .rt tbody tr.selected { background:rgba(88,166,255,0.08); border-left:2px solid var(--blue); }
+  .rt .num { color:var(--dim); font-family:'JetBrains Mono',monospace; text-align:center; width:30px; }
+  .rt .scenario { font-family:'JetBrains Mono',monospace; font-size:12px; }
+  .rt .result-pass { color:var(--green); font-weight:600; text-align:center; font-size:13px; }
+  .rt .result-fail { color:var(--red); font-weight:600; text-align:center; font-size:13px; }
+  .rt .dur { color:var(--dim); font-family:'JetBrains Mono',monospace; font-size:12px; text-align:right; }
+  .rt .detail-cell { font-size:12px; color:var(--muted); }
+  .fail-reason { color:#e8736d; } .pass-info { color:#56d364; }
+  .rt th.center { text-align:center; }
+  .rt tfoot td { background:var(--bg3); font-weight:600; padding:10px 12px; border-top:2px solid var(--border); font-size:13px; height:44px; cursor:default; }
+
+  /* Expand icon column */
+  .rt .expand-cell { width:28px; text-align:center; color:var(--dim); font-size:13px; }
+  .rt .expand-cell .material-symbols-outlined { font-size:16px; transition:color 0.15s; }
+  .rt tbody tr:hover .expand-cell .material-symbols-outlined { color:var(--blue); }
+  .rt tbody tr.selected .expand-cell .material-symbols-outlined { color:var(--blue); }
+  .rt .no-expand { color:transparent; }
+
+  /* Delta table */
+  .delta-wrap { width:130px; flex-shrink:0; background:var(--bg2); border:1px solid var(--border); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
+  .dt { border-collapse:collapse; width:100%; flex:1; }
+  .dt th { background:var(--bg3); padding:9px 6px; font-size:10px; color:var(--dim); text-transform:uppercase; text-align:center; height:36px; font-weight:600; }
+  .dt td { padding:9px 6px; text-align:center; font-size:11px; font-weight:600; border-top:1px solid var(--border); height:40px; vertical-align:middle; }
+  .dt tbody tr { transition:background 0.15s; }
+  .dt tbody tr:hover { background:rgba(188,140,255,0.04); }
+  .d-up { color:var(--green); background:rgba(63,185,80,0.06); }
+  .d-down { color:var(--red); background:rgba(248,81,73,0.06); }
+  .d-same { color:var(--dim); }
+  .d-time-good { color:var(--green); }
+  .d-time-bad { color:var(--red); }
+  .d-time-meh { color:var(--dim); }
+  .dt tfoot td { background:var(--bg3); font-weight:700; padding:10px 6px; border-top:2px solid var(--border); font-size:11px; height:44px; }
+
+  /* Breakdown panel below tables -- 3-column layout */
+  .breakdown-panel {
+    background:var(--bg2); border:1px solid var(--blue); border-radius:12px;
+    padding:0; margin:12px 0; display:none; overflow:hidden;
+    animation:fadeIn 0.2s ease;
+  }
+  .breakdown-panel.open { display:block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+  .bk-top-bar {
+    display:flex; align-items:center; gap:10px; padding:10px 16px;
+    background:rgba(88,166,255,0.06); border-bottom:1px solid var(--border);
+  }
+  .bk-top-bar .bk-scenario { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:600; }
+  .bk-top-bar .bk-close { cursor:pointer; color:var(--dim); font-size:18px; margin-left:auto; }
+  .bk-top-bar .bk-close:hover { color:var(--text); }
+  .bk-columns { display:flex; min-height:120px; }
+  .bk-col { flex:1; padding:14px 16px; }
+  .bk-col-left { border-right:1px solid var(--border); }
+  .bk-col-center {
+    border-right:1px solid var(--border); background:var(--bg3);
+    display:flex; flex-direction:column; justify-content:center;
+    max-width:280px; min-width:200px;
+  }
+  .bk-col-right { }
+  .bk-col-label {
+    font-size:9px; text-transform:uppercase; letter-spacing:0.05em;
+    font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:6px;
+  }
+  .bk-col-label .mode-badge { font-size:8px; padding:2px 6px; }
+  .bk-col-label-blue { color:var(--blue); }
+  .bk-col-label-purple { color:var(--purple); }
+  .bk-col-label-dim { color:var(--dim); }
+  .bk-stats-row { display:flex; gap:16px; margin-bottom:8px; }
+  .bk-stat { text-align:center; min-width:50px; }
+  .bk-stat .bk-label { font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:0.04em; }
+  .bk-stat .bk-value { font-size:14px; font-weight:600; color:var(--text); margin-top:2px; }
+  .tool-table { border-collapse:collapse; font-size:11px; width:100%; }
+  .tool-table th { background:var(--bg3); color:var(--dim); padding:4px 10px; text-align:left; font-size:9px; text-transform:uppercase; border:1px solid var(--border); font-weight:600; border-radius:0; }
+  .tool-table td { padding:4px 10px; border:1px solid var(--border); }
+  .tool-name { font-family:'JetBrains Mono',monospace; color:var(--cyan); font-size:11px; }
+  .tool-count { text-align:center; color:var(--text); }
+  .tool-time { text-align:right; color:var(--dim); font-family:'JetBrains Mono',monospace; }
+  .tool-extra { color:var(--muted); font-size:10px; }
+  .tool-error { color:var(--red); }
+  .tool-tier { color:var(--green); }
+  .bk-notes { font-size:11px; color:var(--muted); margin-top:8px; font-style:italic; padding-top:6px; border-top:1px solid var(--border); }
+  .bk-no-data { font-size:12px; color:var(--dim); font-style:italic; text-align:center; padding:20px 0; }
+  /* Scenario info in center column */
+  .bk-scenario-info .sc-cat {
+    display:inline-block; font-size:9px; font-weight:600; text-transform:uppercase;
+    letter-spacing:0.04em; padding:2px 8px; border-radius:10px; margin-bottom:6px;
+  }
+  .bk-scenario-info .sc-desc { font-size:12px; color:var(--muted); line-height:1.5; }
+  .bk-scenario-info .sc-result-row { display:flex; gap:12px; margin-top:8px; font-size:12px; }
+  .bk-scenario-info .sc-result-row .result-label { color:var(--dim); font-size:10px; text-transform:uppercase; }
+
+  /* Analysis sections */
+  .analysis-list { list-style:none; padding:0; margin:0 0 16px 0; }
+  .analysis-list li { font-size:12px; color:var(--text); padding:6px 12px; background:var(--bg2); border:1px solid var(--border); border-radius:6px; margin:4px 0; display:flex; align-items:center; gap:8px; }
+  .analysis-list li .material-symbols-outlined { font-size:14px; }
+  .action-priority { font-size:9px; font-weight:700; text-transform:uppercase; padding:1px 6px; border-radius:4px; }
+  .ap-high { background:rgba(248,81,73,0.15); color:var(--red); }
+  .ap-medium { background:rgba(210,153,34,0.15); color:var(--yellow); }
+  .ap-low { background:rgba(88,166,255,0.15); color:var(--blue); }
+  .action-id { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--cyan); }
+
+  /* Scenario reference cards */
+  .scenario-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin:10px 0 30px 0; }
+  .scenario-card { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:12px 14px; }
+  .sc-head { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .sc-num { font-size:11px; font-weight:700; color:var(--dim); font-family:'JetBrains Mono',monospace; min-width:20px; }
+  .sc-name { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; }
+  .sc-cat { font-size:9px; font-weight:600; text-transform:uppercase; padding:1px 6px; border-radius:8px; margin-left:auto; }
+  .cat-edit { background:rgba(88,166,255,0.15); color:var(--blue); }
+  .cat-multi { background:rgba(188,140,255,0.15); color:var(--purple); }
+  .cat-readonly { background:rgba(63,185,80,0.15); color:var(--green); }
+  .cat-error { background:rgba(210,153,34,0.15); color:var(--yellow); }
+  .cat-conv { background:rgba(139,148,158,0.15); color:var(--muted); }
+  .cat-verb { background:rgba(57,211,211,0.15); color:var(--cyan); }
+  .sc-desc { font-size:11px; color:var(--muted); line-height:1.4; }
+
+  /* No data placeholder */
+  .no-data { text-align:center; color:var(--dim); padding:60px 20px; font-size:14px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>{{PROJECT_NAME}} Test Results</h1>
+  <span class="sub" id="header-date"></span>
+</div>
+<nav class="nav-bar">
+  <a href="changelog.html" class="nav-link">Changelog</a>
+  <a href="documentation.html" class="nav-link">Documentation</a>
+  <a href="test-results.html" class="nav-link active">Test Results</a>
+  <a href="backlog.html" class="nav-link">Backlog</a>
+</nav>
+
+<div class="main">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="detail" id="detail"></main>
+</div>
+
+<script>
+// ===== SCENARIOS CONSTANT =====
+// Define your test scenarios here. Each scenario has an id, name, category, catClass, and description.
+// The update-test-results agent uses this array to render scenario reference cards and breakdown panels.
+var SCENARIOS = [
+  /*
+  { id: 'example_scenario',
+    name: 'example_scenario',
+    category: 'example',
+    catClass: 'cat-edit',
+    desc: 'Description of what this test scenario validates.' },
+  */
+];
+
+// ===== TEST_RUNS DATA =====
+// The update-test-results agent appends new test run objects here.
+// Do NOT modify HTML/CSS/JS — only append to this array.
+//
+// TEST_RUNS object schema:
+// {
+//   date: 'YYYY-MM-DD',           // Date of the test run
+//   model: 'model-name',          // Model(s) used
+//   mode: 'agent',                // 'agent' or 'orchestrator'
+//   passed: 0,                    // Number of passing scenarios
+//   total: 0,                     // Total number of scenarios
+//   duration: '',                 // Total duration string, e.g. '5m30s'
+//   target: 50,                   // Target pass percentage
+//   score_explanation: '',        // Optional: why score is below target
+//   changes: [                    // Optional: what changed since last run
+//     { type: 'feat', text: 'Description of change' }
+//   ],
+//   results: [                    // Per-scenario results (order matches SCENARIOS)
+//     {
+//       scenario: 'scenario_id',
+//       result: 'PASS',           // 'PASS' or 'FAIL'
+//       time: '1m20s',            // Duration for this scenario
+//       detail: 'Details about the result',
+//       breakdown: {              // Optional: tool-level breakdown
+//         planning: 'direct',     // Planning approach used
+//         turns: 3,               // Number of agent turns
+//         tools: [                // Tool usage details
+//           { name: 'read_file', count: 2, total_time: '5s', match_tier: '', error: '' }
+//         ],
+//         notes: ''               // Additional notes
+//       }
+//     }
+//   ],
+//   unexpected: [],               // Optional: unexpected regressions
+//   improvements: [],             // Optional: notable improvements
+//   ideas: [],                    // Optional: improvement ideas
+//   action_items: [               // Optional: action items
+//     { id: 'A1', priority: 'high', text: 'Action item description' }
+//   ]
+// }
+var TEST_RUNS = [];
+// ===== END TEST_RUNS DATA =====
+
+// ===== GLOBAL STATE =====
+var currentRun = TEST_RUNS.length - 1;
+var compareRun = TEST_RUNS.length > 1 ? TEST_RUNS.length - 2 : null;
+
+// ===== UTILITY FUNCTIONS =====
+function parseTime(str) {
+  if (!str) return 0;
+  var total = 0;
+  var m = str.match(/(\d+)m/);
+  if (m) total += parseInt(m[1]) * 60;
+  var s = str.match(/(\d+(?:\.\d+)?)s/);
+  if (s) total += parseFloat(s[1]);
+  return total;
+}
+
+function formatTime(seconds) {
+  if (seconds === 0) return '\u2014';
+  var neg = seconds < 0;
+  seconds = Math.abs(seconds);
+  var m = Math.floor(seconds / 60);
+  var s = Math.round(seconds % 60);
+  var str = '';
+  if (m > 0) str += m + 'm';
+  str += (m > 0 && s < 10 ? '0' : '') + s + 's';
+  return (neg ? '-' : '+') + str;
+}
+
+function formatDuration(seconds) {
+  if (seconds === 0) return '';
+  var m = Math.floor(seconds / 60);
+  var s = Math.round(seconds % 60);
+  if (m > 0) return m + 'm' + (s < 10 ? '0' : '') + s + 's';
+  return s + 's';
+}
+
+function pctColor(pct) {
+  if (pct >= 70) return 'var(--green)';
+  if (pct >= 50) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+function scoreBadgeClass(pct) {
+  if (pct >= 70) return 'badge-green';
+  if (pct >= 50) return 'badge-yellow';
+  return 'badge-red';
+}
+
+function shortDate(d) {
+  var parts = d.split('-');
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[parseInt(parts[1]) - 1] + ' ' + parseInt(parts[2]);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ===== SIDEBAR =====
+function renderSidebar(selectedIndex) {
+  var html = '<div class="sidebar-label">Test Runs</div>';
+  for (var i = TEST_RUNS.length - 1; i >= 0; i--) {
+    var run = TEST_RUNS[i];
+    var pct = Math.round(run.passed / run.total * 100);
+    var active = i === selectedIndex ? ' active' : '';
+    var color = pctColor(pct);
+    var modeClass = run.mode === 'orchestrator' ? 'tag-orch' : 'tag-agent';
+    var modeLabel = run.mode === 'orchestrator' ? 'orchestrator' : 'single agent';
+    html += '<div class="run-card' + active + '" onclick="selectRun(' + i + ')">';
+    html += '<div class="date">' + run.date + '</div>';
+    html += '<div class="model">' + escapeHtml(run.model) + '</div>';
+    html += '<span class="mode-tag ' + modeClass + '">' + modeLabel + '</span>';
+    html += '<div class="bar-row"><div class="bar-bg"><div class="bar-fill" style="width:' + pct + '%;background:' + color + '"></div></div>';
+    html += '<span class="pct" style="color:' + color + '">' + pct + '%</span></div></div>';
+  }
+  document.getElementById('sidebar').innerHTML = html;
+}
+
+// ===== DETAIL PANEL =====
+function renderDetail() {
+  var run = TEST_RUNS[currentRun];
+  if (!run) { document.getElementById('detail').innerHTML = '<div class="no-data">No test runs recorded yet. The update-test-results agent will populate this dashboard as tests are run.</div>'; return; }
+  var pct = Math.round(run.passed / run.total * 100);
+  var html = '';
+
+  // Header
+  html += '<div class="detail-header">';
+  html += '<div class="dh-top">';
+  html += '<span class="dh-date">' + run.date + '</span>';
+  html += '<span class="dh-score ' + scoreBadgeClass(pct) + '">' + run.passed + '/' + run.total + ' (' + pct + '%)</span>';
+  html += '</div>';
+  html += '<div class="dh-meta">';
+  var mbClass = run.mode === 'orchestrator' ? 'mb-orch' : 'mb-agent';
+  var mbLabel = run.mode === 'orchestrator' ? 'orchestrator' : 'single agent';
+  html += '<span class="mode-badge ' + mbClass + '">' + mbLabel + '</span>';
+  html += '<span>' + escapeHtml(run.model) + '</span>';
+  if (run.duration) html += '<span>\u00b7 ' + run.duration + '</span>';
+  if (run.target) html += '<span>\u00b7 Target: ' + run.target + '%</span>';
+  html += '</div></div>';
+
+  // Score explanation
+  if (run.score_explanation && pct < run.target) {
+    html += '<div class="score-explanation">';
+    html += '<div class="se-title"><span class="material-symbols-outlined">warning</span> Below Target</div>';
+    html += escapeHtml(run.score_explanation);
+    html += '</div>';
+  }
+
+  // What Changed
+  if (run.changes && run.changes.length > 0) {
+    html += '<div class="section-label sl-blue"><span class="material-symbols-outlined">change_history</span> What Changed</div>';
+    html += '<div class="changes-box"><ul class="changes-list">';
+    for (var c = 0; c < run.changes.length; c++) {
+      var ch = run.changes[c];
+      var ctClass = 'ct-' + ch.type;
+      html += '<li><span class="change-type ' + ctClass + '">' + ch.type + '</span> ' + escapeHtml(ch.text) + '</li>';
+    }
+    html += '</ul></div>';
+  }
+
+  // Tables section
+  html += '<div class="section-label sl-blue"><span class="material-symbols-outlined">checklist</span> Scenario Results</div>';
+  html += '<p style="font-size:11px;color:var(--dim);margin-bottom:12px;">Click any scenario row to view tool usage breakdown below.</p>';
+
+  html += renderTablesRow(run);
+
+  // Breakdown panel placeholder (3-column: active | scenario | compare)
+  html += '<div class="breakdown-panel" id="breakdown-panel">';
+  html += '<div class="bk-top-bar">';
+  html += '<span class="material-symbols-outlined" style="color:var(--blue);font-size:18px;">info</span>';
+  html += '<span class="bk-scenario" id="bk-scenario-name"></span>';
+  html += '<span class="bk-close material-symbols-outlined" onclick="closeBreakdown()">close</span>';
+  html += '</div>';
+  html += '<div class="bk-columns" id="bk-columns"></div>';
+  html += '</div>';
+
+  // Analysis sections
+  html += renderAnalysis(run);
+
+  // Scenario reference
+  html += renderScenarioReference();
+
+  document.getElementById('detail').innerHTML = html;
+}
+
+// ===== TABLES ROW =====
+function renderTablesRow(run) {
+  var compRun = compareRun !== null ? TEST_RUNS[compareRun] : null;
+  var html = '<div class="tables-row">';
+
+  // Active table
+  html += '<div class="table-panel"><div class="table-wrap">';
+  html += '<div class="table-header th-active">';
+  var mbClass = run.mode === 'orchestrator' ? 'mb-orch' : 'mb-agent';
+  var mbLabel = run.mode === 'orchestrator' ? 'orchestrator' : 'single agent';
+  html += '<span class="mode-badge ' + mbClass + '">' + mbLabel + '</span>';
+  html += '<span class="th-label">' + shortDate(run.date) + ' \u00b7 ' + escapeHtml(run.model) + '</span>';
+  var aPct = Math.round(run.passed / run.total * 100);
+  html += '<span class="score-badge ' + scoreBadgeClass(aPct) + '">' + run.passed + '/' + run.total + '</span>';
+  html += '</div>';
+  html += renderResultsTable('active', run);
+  html += '</div></div>';
+
+  // Delta table
+  if (compRun) {
+    html += '<div class="delta-wrap">';
+    html += '<div class="table-header th-delta" style="height:46px;"><span class="delta-label">\u0394 Delta</span></div>';
+    html += renderDeltaTable(run, compRun);
+    html += '</div>';
+  }
+
+  // Comparison table
+  if (compRun) {
+    html += '<div class="table-panel"><div class="table-wrap">';
+    html += '<div class="table-header th-compare">';
+    var cmbClass = compRun.mode === 'orchestrator' ? 'mb-orch' : 'mb-agent';
+    var cmbLabel = compRun.mode === 'orchestrator' ? 'orchestrator' : 'single agent';
+    html += '<span class="mode-badge ' + cmbClass + '">' + cmbLabel + '</span>';
+    // Dropdown
+    html += '<select onchange="changeCompare(parseInt(this.value))">';
+    for (var i = TEST_RUNS.length - 1; i >= 0; i--) {
+      if (i === currentRun) continue;
+      var r = TEST_RUNS[i];
+      var rPct = Math.round(r.passed / r.total * 100);
+      var rMode = r.mode === 'orchestrator' ? 'orch' : 'agent';
+      var sel = i === compareRun ? ' selected' : '';
+      html += '<option value="' + i + '"' + sel + '>' + shortDate(r.date) + ' \u00b7 ' + escapeHtml(r.model) + ' \u00b7 ' + rMode + ' \u00b7 ' + rPct + '%</option>';
+    }
+    html += '</select>';
+    html += '</div>';
+    html += renderResultsTable('compare', compRun);
+    html += '</div></div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
+// ===== RESULTS TABLE =====
+function renderResultsTable(tableId, run) {
+  var html = '<table class="rt" id="' + tableId + '-table">';
+  html += '<thead><tr>';
+  html += '<th style="width:30px;text-align:center;">#</th>';
+  html += '<th>Scenario</th>';
+  html += '<th class="center" style="width:52px;">Result</th>';
+  html += '<th style="width:50px;text-align:right;">Time</th>';
+  html += '<th style="width:28px;"></th>';
+  html += '</tr></thead><tbody>';
+
+  var totalTime = 0;
+  for (var i = 0; i < run.results.length; i++) {
+    var r = run.results[i];
+    var rClass = r.result === 'PASS' ? 'result-pass' : 'result-fail';
+    var expandHtml = '<span class="material-symbols-outlined">expand_circle_down</span>';
+
+    totalTime += parseTime(r.time);
+
+    html += '<tr onclick="showBreakdown(\'' + tableId + '\',' + i + ')">';
+    html += '<td class="num">' + (i + 1) + '</td>';
+    html += '<td class="scenario">' + escapeHtml(r.scenario) + '</td>';
+    html += '<td class="' + rClass + '">' + r.result + '</td>';
+    html += '<td class="dur">' + (r.time || '\u2014') + '</td>';
+    html += '<td class="expand-cell">' + expandHtml + '</td>';
+    html += '</tr>';
+  }
+  html += '</tbody>';
+
+  // Footer
+  var scoreColor = pctColor(Math.round(run.passed / run.total * 100));
+  html += '<tfoot><tr>';
+  html += '<td></td><td>Total</td>';
+  html += '<td class="center" style="color:' + scoreColor + ';font-weight:700;">' + run.passed + '/' + run.total + '</td>';
+  html += '<td class="dur" style="font-weight:700;">' + (totalTime > 0 ? formatDuration(totalTime) : '\u2014') + '</td>';
+  html += '<td></td>';
+  html += '</tr></tfoot></table>';
+  return html;
+}
+
+// ===== DELTA TABLE =====
+function renderDeltaTable(activeRun, compRun) {
+  var html = '<table class="dt"><thead><tr><th>Result</th><th>Time</th></tr></thead><tbody>';
+  var totalResultDelta = 0;
+  var totalTimeDelta = 0;
+  var activeTotal = 0;
+  var compTotal = 0;
+
+  for (var i = 0; i < activeRun.results.length; i++) {
+    var aRes = activeRun.results[i].result;
+    var cRes = compRun.results[i] ? compRun.results[i].result : '';
+    var aTime = parseTime(activeRun.results[i].time);
+    var cTime = compRun.results[i] ? parseTime(compRun.results[i].time) : 0;
+    activeTotal += aTime;
+    compTotal += cTime;
+
+    // Result delta
+    var resultHtml = '';
+    var resultClass = 'd-same';
+    if (aRes === 'PASS' && cRes === 'FAIL') {
+      resultHtml = '\u25B2 FIX';
+      resultClass = 'd-up';
+      totalResultDelta++;
+    } else if (aRes === 'FAIL' && cRes === 'PASS') {
+      resultHtml = '\u25BC REG';
+      resultClass = 'd-down';
+      totalResultDelta--;
+    } else {
+      resultHtml = '\u2014';
+    }
+
+    // Time delta
+    var timeDiff = aTime - cTime;
+    var timeHtml = '';
+    var timeClass = 'd-time-meh';
+    if (aTime === 0 || cTime === 0) {
+      timeHtml = '\u2014';
+      timeClass = 'd-time-meh';
+    } else {
+      var absDiff = Math.abs(timeDiff);
+      var relDiff = cTime > 0 ? absDiff / cTime : 0;
+      if (absDiff < 10 && relDiff < 0.15) {
+        timeClass = 'd-time-meh';
+      } else if (timeDiff < 0) {
+        timeClass = 'd-time-good';
+      } else {
+        timeClass = 'd-time-bad';
+      }
+      timeHtml = formatTime(timeDiff);
+      totalTimeDelta += timeDiff;
+    }
+
+    html += '<tr><td class="' + resultClass + '">' + resultHtml + '</td><td class="' + timeClass + '">' + timeHtml + '</td></tr>';
+  }
+
+  // Footer
+  var footResultColor = totalResultDelta > 0 ? 'var(--green)' : totalResultDelta < 0 ? 'var(--red)' : 'var(--dim)';
+  var footResultText = totalResultDelta > 0 ? '+' + totalResultDelta : totalResultDelta.toString();
+  var footTimeDelta = activeTotal - compTotal;
+  var footTimeClass = '';
+  if (activeTotal === 0 || compTotal === 0) {
+    footTimeClass = 'd-time-meh';
+  } else if (footTimeDelta < 0) {
+    footTimeClass = 'd-time-good';
+  } else if (footTimeDelta > 0) {
+    footTimeClass = 'd-time-bad';
+  } else {
+    footTimeClass = 'd-time-meh';
+  }
+  var footTimeText = (activeTotal === 0 || compTotal === 0) ? '\u2014' : formatTime(footTimeDelta);
+
+  html += '</tbody><tfoot><tr>';
+  html += '<td style="color:' + footResultColor + '">' + footResultText + '</td>';
+  html += '<td class="' + footTimeClass + '">' + footTimeText + '</td>';
+  html += '</tr></tfoot></table>';
+  return html;
+}
+
+// ===== BREAKDOWN PANEL (3-column: active | scenario | compare) =====
+
+function _renderBreakdownCol(run, idx, label, modeClass) {
+  if (!run || !run.results[idx]) return '<div class="bk-no-data">No data</div>';
+  var result = run.results[idx];
+  var bd = result.breakdown;
+
+  var html = '<div class="bk-col-label ' + (modeClass === 'mb-orch' ? 'bk-col-label-purple' : 'bk-col-label-blue') + '">';
+  html += '<span class="mode-badge ' + modeClass + '">' + (run.mode === 'orchestrator' ? 'orch' : 'agent') + '</span> ';
+  html += label + '</div>';
+
+  // Result + time
+  html += '<div style="margin-bottom:8px;">';
+  html += '<span class="' + (result.result === 'PASS' ? 'pass-info' : 'fail-reason') + '" style="font-size:13px;font-weight:600;">' + result.result + '</span>';
+  html += '<span style="color:var(--dim);font-size:12px;margin-left:8px;">' + (result.time || '') + '</span>';
+  html += '</div>';
+  html += '<div style="font-size:11px;color:var(--muted);margin-bottom:8px;">' + escapeHtml(result.detail || '') + '</div>';
+
+  if (!bd) return html + '<div class="bk-no-data">No tool-level data for this run</div>';
+
+  // Stats
+  html += '<div class="bk-stats-row">';
+  html += '<div class="bk-stat"><div class="bk-label">Planning</div><div class="bk-value">' + (bd.planning || '\u2014') + '</div></div>';
+  html += '<div class="bk-stat"><div class="bk-label">Turns</div><div class="bk-value">' + (bd.turns || '\u2014') + '</div></div>';
+  html += '</div>';
+
+  // Tool table
+  if (bd.tools && bd.tools.length > 0) {
+    html += '<table class="tool-table"><thead><tr><th>Tool</th><th>Calls</th><th>Time</th><th>Info</th></tr></thead><tbody>';
+    for (var i = 0; i < bd.tools.length; i++) {
+      var t = bd.tools[i];
+      var infoHtml = '';
+      if (t.match_tier) infoHtml = '<span class="tool-tier">' + escapeHtml(t.match_tier) + '</span>';
+      if (t.error) infoHtml = '<span class="tool-error">' + escapeHtml(t.error) + '</span>';
+      html += '<tr><td class="tool-name">' + escapeHtml(t.name) + '</td>';
+      html += '<td class="tool-count">' + t.count + '</td>';
+      html += '<td class="tool-time">' + (t.total_time || '') + '</td>';
+      html += '<td class="tool-extra">' + infoHtml + '</td></tr>';
+    }
+    html += '</tbody></table>';
+  } else {
+    html += '<div style="font-size:11px;color:var(--dim);font-style:italic;">No tools used</div>';
+  }
+
+  if (bd.notes) {
+    html += '<div class="bk-notes">' + escapeHtml(bd.notes) + '</div>';
+  }
+  return html;
+}
+
+function showBreakdown(tableId, idx) {
+  // Highlight selected row in both tables
+  document.querySelectorAll('.rt tbody tr').forEach(function(r) { r.classList.remove('selected'); });
+  var activeTable = document.getElementById('active-table');
+  var compareTable = document.getElementById('compare-table');
+  if (activeTable && activeTable.querySelectorAll('tbody tr')[idx]) {
+    activeTable.querySelectorAll('tbody tr')[idx].classList.add('selected');
+  }
+  if (compareTable && compareTable.querySelectorAll('tbody tr')[idx]) {
+    compareTable.querySelectorAll('tbody tr')[idx].classList.add('selected');
+  }
+
+  var activeRun = TEST_RUNS[currentRun];
+  var compRun = compareRun !== null ? TEST_RUNS[compareRun] : null;
+  var scenario = SCENARIOS[idx];
+
+  // Header
+  document.getElementById('bk-scenario-name').textContent = scenario ? scenario.name : 'Scenario ' + (idx + 1);
+
+  // Build 3 columns
+  var cols = '';
+
+  // Left: active run breakdown
+  cols += '<div class="bk-col bk-col-left">';
+  cols += _renderBreakdownCol(
+    activeRun, idx,
+    shortDate(activeRun.date) + ' &middot; ' + activeRun.model,
+    activeRun.mode === 'orchestrator' ? 'mb-orch' : 'mb-agent'
+  );
+  cols += '</div>';
+
+  // Center: scenario description
+  cols += '<div class="bk-col bk-col-center">';
+  cols += '<div class="bk-scenario-info">';
+  cols += '<div class="bk-col-label bk-col-label-dim"><span class="material-symbols-outlined" style="font-size:14px;">description</span> Scenario Details</div>';
+  if (scenario) {
+    cols += '<span class="sc-cat ' + scenario.catClass + '">' + scenario.category + '</span>';
+    cols += '<div class="sc-desc">' + escapeHtml(scenario.desc) + '</div>';
+  } else {
+    cols += '<div class="sc-desc">No scenario definition found.</div>';
+  }
+  cols += '</div></div>';
+
+  // Right: comparison run breakdown
+  cols += '<div class="bk-col bk-col-right">';
+  if (compRun) {
+    cols += _renderBreakdownCol(
+      compRun, idx,
+      shortDate(compRun.date) + ' &middot; ' + compRun.model,
+      compRun.mode === 'orchestrator' ? 'mb-orch' : 'mb-agent'
+    );
+  } else {
+    cols += '<div class="bk-no-data">No comparison selected</div>';
+  }
+  cols += '</div>';
+
+  var colsEl = document.getElementById('bk-columns');
+  if (colsEl) colsEl.innerHTML = cols;
+
+  var panel = document.getElementById('breakdown-panel');
+  if (panel) {
+    panel.classList.add('open');
+    panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  }
+}
+
+function closeBreakdown() {
+  var panel = document.getElementById('breakdown-panel');
+  if (panel) panel.classList.remove('open');
+  document.querySelectorAll('.rt tbody tr').forEach(function(r) { r.classList.remove('selected'); });
+}
+
+// ===== ANALYSIS SECTIONS =====
+function renderAnalysis(run) {
+  var html = '';
+
+  if (run.unexpected && run.unexpected.length > 0) {
+    html += '<div class="section-label sl-red"><span class="material-symbols-outlined">error</span> Unexpected Changes</div>';
+    html += '<ul class="analysis-list">';
+    for (var i = 0; i < run.unexpected.length; i++) {
+      html += '<li><span class="material-symbols-outlined" style="color:var(--red)">warning</span> ' + escapeHtml(run.unexpected[i]) + '</li>';
+    }
+    html += '</ul>';
+  }
+
+  if (run.improvements && run.improvements.length > 0) {
+    html += '<div class="section-label sl-green"><span class="material-symbols-outlined">trending_up</span> Improvements</div>';
+    html += '<ul class="analysis-list">';
+    for (var i = 0; i < run.improvements.length; i++) {
+      html += '<li><span class="material-symbols-outlined" style="color:var(--green)">check_circle</span> ' + escapeHtml(run.improvements[i]) + '</li>';
+    }
+    html += '</ul>';
+  }
+
+  if (run.ideas && run.ideas.length > 0) {
+    html += '<div class="section-label sl-purple"><span class="material-symbols-outlined">lightbulb</span> Ideas</div>';
+    html += '<ul class="analysis-list">';
+    for (var i = 0; i < run.ideas.length; i++) {
+      html += '<li><span class="material-symbols-outlined" style="color:var(--purple)">lightbulb</span> ' + escapeHtml(run.ideas[i]) + '</li>';
+    }
+    html += '</ul>';
+  }
+
+  if (run.action_items && run.action_items.length > 0) {
+    html += '<div class="section-label sl-yellow"><span class="material-symbols-outlined">assignment</span> Action Items</div>';
+    html += '<ul class="analysis-list">';
+    for (var i = 0; i < run.action_items.length; i++) {
+      var ai = run.action_items[i];
+      var apClass = 'ap-' + (ai.priority || 'medium');
+      html += '<li>';
+      if (ai.id) html += '<span class="action-id">' + escapeHtml(ai.id) + '</span> ';
+      if (ai.priority) html += '<span class="action-priority ' + apClass + '">' + ai.priority + '</span> ';
+      html += escapeHtml(ai.text);
+      html += '</li>';
+    }
+    html += '</ul>';
+  }
+
+  return html;
+}
+
+// ===== SCENARIO REFERENCE =====
+function renderScenarioReference() {
+  if (SCENARIOS.length === 0) return '';
+  var html = '<div class="section-label sl-blue"><span class="material-symbols-outlined">description</span> Scenario Reference</div>';
+  html += '<div class="scenario-grid">';
+  for (var i = 0; i < SCENARIOS.length; i++) {
+    var s = SCENARIOS[i];
+    html += '<div class="scenario-card"><div class="sc-head">';
+    html += '<span class="sc-num">' + (i + 1) + '</span>';
+    html += '<span class="sc-name">' + escapeHtml(s.name) + '</span>';
+    html += '<span class="sc-cat ' + s.catClass + '">' + s.category + '</span>';
+    html += '</div><div class="sc-desc">' + escapeHtml(s.desc) + '</div></div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+// ===== NAVIGATION =====
+function selectRun(index) {
+  currentRun = index;
+  compareRun = index > 0 ? index - 1 : (index < TEST_RUNS.length - 1 ? index + 1 : null);
+  closeBreakdown();
+  renderSidebar(index);
+  renderDetail();
+}
+
+function changeCompare(index) {
+  compareRun = index;
+  closeBreakdown();
+  renderDetail();
+}
+
+// ===== INIT =====
+(function() {
+  if (TEST_RUNS.length > 0) {
+    selectRun(TEST_RUNS.length - 1);
+  } else {
+    document.getElementById('detail').innerHTML = '<div class="no-data">No test runs recorded yet. The update-test-results agent will populate this dashboard as tests are run.</div>';
+    document.getElementById('sidebar').innerHTML = '<div class="sidebar-label">Test Runs</div><div style="text-align:center;color:var(--dim);font-size:12px;padding:20px 0;">No runs yet</div>';
+  }
+})();
+</script>
+</body>
+</html>
