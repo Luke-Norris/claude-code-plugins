@@ -2,7 +2,7 @@
 name: update-backlog
 description: "Updates the project backlog HTML with new items, status changes, and priority changes discovered during development. Use when new issues are found, items are completed, or priorities change."
 model: sonnet
-color: purple
+color: magenta
 ---
 
 # Update Backlog Agent
