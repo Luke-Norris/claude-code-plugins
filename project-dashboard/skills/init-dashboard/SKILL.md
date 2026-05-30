@@ -67,7 +67,14 @@ Created:
   {dashboard_dir}/documentation.html
   .dashboard.json
 
-The post-commit hook will automatically trigger changelog and backlog updates after each git commit.
+Auto-updates are now active for this project: after any task that changes
+files, the plugin's Stop hook will refresh the changelog, backlog, and
+documentation dashboards. Turns that don't touch files are skipped.
 
-To manually update documentation, ask me to run the update-documentation agent.
+You can also update any dashboard on demand by asking me to run the
+update-changelog, update-backlog, or update-documentation agent.
 ```
+
+> Note: the dashboards only auto-update once `.dashboard.json` exists (created
+> above). Until a project is initialized, the plugin's hooks stay inert — so the
+> plugin can be enabled everywhere but only acts where you've run this command.
