@@ -1,0 +1,13 @@
+{
+  "name": "premiers-ops",
+  "description": "Operate the Premiers platform: state and stats SSOT, stack health checks, staging-to-production promotion, issue and board triage, partner-org onboarding, and pre-event compliance checks.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luke Norris"
+  },
+  "source": {
+    "source": "url",
+    "url": "https://github.com/Luke-Norris/claude-code-plugins.git",
+    "path": "premiers-ops"
+  }
+}

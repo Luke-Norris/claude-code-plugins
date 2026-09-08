@@ -10,6 +10,11 @@
       "name": "project-dashboard",
       "source": "./project-dashboard",
       "description": "Auto-maintained HTML dashboards for project changelog, backlog, documentation, and test results."
+    },
+    {
+      "name": "premiers-ops",
+      "source": "./premiers-ops",
+      "description": "Operate the Premiers platform: state and stats reporting, stack health checks, staging-to-production promotion, and issue and board triage."
     }
   ]
 }
